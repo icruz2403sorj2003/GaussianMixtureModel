@@ -61,6 +61,8 @@ class GaussianMixtureModel:
 
         self.Lambda = np.zeros(shape = (self.M, self.D, self.D))
 
+        self.epsilon = 0
+
     def initialize_parameters(self) -> None:
 
         self.alpha = np.repeat(self.alpha_0, repeats = self.M)
@@ -176,3 +178,49 @@ class GaussianMixtureModel:
         self.update_Phi()
 
         self.update_Psi()
+
+    def estimates_pi(self) -> None:
+
+        self.pi = self.alpha/self.alpha.sum()
+
+    def estimates_Z(self) -> None:
+
+        self.Z = np.argmax(self.gamma, axis = 1)
+
+    def estimates_Sigma(self) -> None:
+
+        self.Sigma = self.Phi/(np.expand_dims(self.nu, axis = (1, 2)) + self.D + 1)
+
+    def estimates_Lambda(self) -> None:
+
+        self.Lambda = np.expand_dims(self.nu, axis = (1, 2))*self.Psi
+
+    def estimates_parameters(self) -> None:
+
+        self.estimates_pi()
+
+        self.estimates_Z()
+
+        self.estimates_Sigma()
+
+        self.estimates_Lambda()
+
+    def update_model(self, MAX : int = 1000, TOL : float = 1e-6) -> None:
+
+        self.initialize_parameters()
+
+        for i in range(MAX):
+
+            self.epsilon = self.mu.copy()
+
+            self.update_parameters()
+
+            self.epsilon -= self.mu
+
+            self.epsilon = np.linalg.norm(self.epsilon, axis = 0).max()
+
+            if self.epsilon < TOL:
+
+                break
+
+        self.estimates_parameters()
