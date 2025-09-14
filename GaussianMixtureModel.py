@@ -1,7 +1,10 @@
 
 import numpy as np
 
+from scipy.special import gamma
 from scipy.special import psi
+
+from scipy.special import multigammaln
 
 from sklearn.cluster import kmeans_plusplus
 
